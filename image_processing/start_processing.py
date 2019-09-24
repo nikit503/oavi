@@ -3,11 +3,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from skimage import io
 import skimage.data as data
-import skimage.segmentation as seg
+from skimage.exposure import histogram
 import skimage.filters as filters
 import skimage.draw as draw
 import skimage.color as color
 from skimage.filters import try_all_threshold
+
 
 def image_show(image, nrows=1, ncols=1, cmap='gray'):
     fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=(14, 14))
@@ -51,20 +52,69 @@ def balanced_hist_thresholding(b):
     return i_m
 
 
+def draw_hist(hist):
+    x = np.arange(0, len(hist))
+    fig, ax = plt.subplots()
+    ax.bar(x, hist, color='darkblue')
+    ax.set_facecolor('seashell')
+    fig.set_facecolor('floralwhite')
+
+
+def get_weight(hist, since, before):
+    weight = 0
+    for item in hist[since:before]:
+        weight += item
+    return weight
+
+
+def balanced_hist_thresholding(hist):
+    # Starting point of histogram
+    first_index = 0
+    # End point of histogram
+    last_index = 255
+    # Center of histogram
+    midle_index = (first_index + last_index) // 2
+    # Left side weight
+    weight_left = get_weight(hist, first_index, midle_index + 1)
+    # Right side weight
+    weight_right = get_weight(hist, midle_index + 1, last_index + 1)
+    # Until starting point not equal to endpoint
+    while (first_index != last_index):
+        # If right side is heavier
+        if (weight_right > weight_left):
+            # Remove the end weight
+            weight_right -= hist[last_index]
+            last_index -= 1
+            # Adjust the center position and recompute the weights
+            if ((first_index + last_index) // 2) < midle_index:
+                weight_left -= hist[midle_index]
+                weight_right += hist[midle_index]
+                midle_index -= 1
+        else:
+            # If left side is heavier, remove the starting weight
+            weight_left -= hist[first_index]
+            first_index += 1
+            # Adjust the center position and recompute the weights
+            if ((first_index + last_index) // 2) >= midle_index:
+                weight_left += hist[midle_index + 1]
+                weight_right -= hist[midle_index + 1]
+                midle_index += 1
+    return midle_index
+
+
 if __name__ == '__main__':
-    # image = data.camera()
-    image = io.imread('D:/photo/velic.jpg')
+    image = data.camera()
+    # image = io.imread('D:/photo/velic.jpg')
 
-    # text = data.page()
-    # image_show(text)
+    hist, hist_centers = histogram(image)
+    draw_hist(hist)
 
-    fig, ax = try_all_threshold(image, figsize=(10, 8), verbose=False)
-    # image_hist = ax.hist(text.ravel(), bins=32, range=[0, 256])
-    # ax.set_xlim(0, 256)
+    thresh_value = balanced_hist_thresholding(hist)
+    print("thresh_value: " + str(thresh_value))
 
-    # thresh_value = balanced_hist_thresholding(image_hist)
-    # print(thresh_value)
-    # plt.imshow(image)
+    text_segmented = image > thresh_value
+    image_show(text_segmented)
+
     plt.show()
 
-    # io.imsave('D:/photo/out.jpg', image)
+# io.imsave('D:/photo/out.jpg', image)
