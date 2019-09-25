@@ -17,9 +17,7 @@ if __name__ == '__main__':
 
     image_binarized = treshold_image(image.copy(), thresh_value)
 
-    image[0, 0] = [0, 0, 0]
-    print(image[0, 0, 0])
-    # image_show(image)
+    image_show(image)
     image_show(image_binarized)
 
 # io.imsave('D:/photo/out.jpg', image)
