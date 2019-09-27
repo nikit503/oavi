@@ -14,8 +14,8 @@ def balanced_hist_thresholding(hist):
     midle_index = (first_index + last_index) // 2
     weight_left = _get_weight(hist, first_index, midle_index + 1)
     weight_right = _get_weight(hist, midle_index + 1, last_index + 1)
-    while (first_index != last_index):
-        if (weight_right > weight_left):
+    while first_index != last_index:
+        if weight_right > weight_left:
             weight_right -= hist[last_index]
             last_index -= 1
             # Adjust the center position and recompute the weights

@@ -5,8 +5,10 @@ from image_processing.treshold import balanced_hist_thresholding, treshold_image
 from image_processing.utils import image_show, draw_hist
 
 if __name__ == '__main__':
-    # image = data.camera()
-    image = data.astronaut()
+    image = data.camera()
+    # image = data.checkerboard()
+    # image = data.astronaut()
+
     # image = io.imread('D:/photo/velic.jpg')
 
     hist, hist_centers = histogram(image)
